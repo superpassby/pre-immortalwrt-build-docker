@@ -74,6 +74,7 @@ jobs:
         echo "TAG_NAME=${TAG_NAME}"  # 显示标签名
         git tag $TAG_NAME  # 创建新的 Git 标签
         git push origin $TAG_NAME  # 推送标签到远程仓库
+        git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/superpassby/pre-immortalwrt-build-docker $TAG_NAME  # 使用 PAT 推送标签
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
