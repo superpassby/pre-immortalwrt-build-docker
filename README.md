@@ -37,6 +37,11 @@ cd openwrt
 # make clean （如编译有问题，尝试 make clean 后再次编译）
 
 git pull
+
+#复制你自定义源，如：
+
+git clone --depth=1 https://github.com/sirpdboy/luci-app-lucky.git package/lucky
+
 ./scripts/feeds update -a && ./scripts/feeds install -a
 
 #复制并替换 .config 到 容器的/home/user/openwrt/
