@@ -75,14 +75,10 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Checkout code with tag
-      uses: actions/checkout@v2
-      with:
-        ref: ${{ steps.create_tag.outputs.TAG_NAME }}
-
     - name: Upload Docker parts to GitHub Release
       uses: softprops/action-gh-release@v1
       with:
+        tag_name: ${{ steps.create_tag.outputs.TAG_NAME }}
         files: |
           pre-immortalwrt-build-docker_part_*
       env:
