@@ -126,34 +126,26 @@ jobs:
         done
 
     - name: Delete old releases
-      #if: false  # 跳过该步骤
       run: |
         echo "Deleting old releases..."
         RELEASES=$(curl -s -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
           "https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/releases")
         RELEASE_IDS=$(echo $RELEASES | jq '. | sort_by(.created_at) | reverse | .[3:] | .[].id')
         for RELEASE_ID in $(echo $RELEASE_IDS); do
-          echo "Deleting release: $RELEASE_ID"
+          RELEASE_NAME=$(echo $RELEASES | jq -r ".[] | select(.id == $RELEASE_ID) | .name")
+          echo "Deleting release: $RELEASE_NAME"
           curl -X DELETE -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
           "https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/releases/$RELEASE_ID"
         done
 
-    
     - name: Delete old tags
       run: |
         echo "Deleting old tags..."
-
-        # 获取所有标签信息
         TAGS=$(curl -s -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
           "https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/tags")
-
-        # 提取标签名称和创建时间
         TAG_NAMES=$(echo $TAGS | jq '. | sort_by(.commit.committer.date) | reverse | .[3:] | .[].name')
-
-        # 删除除最新三个标签外的所有标签
         for TAG_NAME in $(echo $TAG_NAMES | tr -d '"'); do
           echo "Deleting tag: $TAG_NAME"
           curl -X DELETE -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
           "https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/git/refs/tags/$TAG_NAME"
         done
-
