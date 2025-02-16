@@ -72,8 +72,8 @@ jobs:
         uses: actions/create-release@v1
         with:
           tag_name: v1.0.$(date +%Y%m%d%H%M%S)  # 使用时间戳生成唯一的标签
-           release_name: "Docker Image Release"
-           body: "Release of pre-immortalwrt-build-docker image"
+          release_name: "Docker Image Release"
+          body: "Release of pre-immortalwrt-build-docker image"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
