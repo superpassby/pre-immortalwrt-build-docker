@@ -68,14 +68,14 @@ jobs:
         ls -lh pre-immortalwrt-build-docker_part_*
 
     - name: Create GitHub release
-      id: create_release
-      uses: actions/create-release@v1
-      with:
-        tag_name: v1.0.${{ github.event.head_commit.timestamp }}  # 使用时间戳生成唯一标签
-        release_name: "Docker Image Release"
-        body: "Release of pre-immortalwrt-build-docker image"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: v1.0.$(date +%Y%m%d%H%M%S)  # 使用时间戳生成唯一的标签
+           release_name: "Docker Image Release"
+           body: "Release of pre-immortalwrt-build-docker image"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload Docker image parts to GitHub release
       run: |
