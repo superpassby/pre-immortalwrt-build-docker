@@ -67,36 +67,10 @@ jobs:
         split -b 1024m pre-immortalwrt-build-docker.tar.gz "pre-immortalwrt-build-docker_part_"
         ls -lh pre-immortalwrt-build-docker_part_*
 
-    - name: Create GitHub release
-        id: create_release
-        uses: actions/create-release@v1
-        with:
-          tag_name: v1.0.$(date +%Y%m%d%H%M%S)  # 使用时间戳生成唯一的标签
-          release_name: "Docker Image Release"
-          body: "Release of pre-immortalwrt-build-docker image"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Upload Docker image parts to GitHub release
-      run: |
-        # Get the list of files that match the pattern
-        file_list=$(ls pre-immortalwrt-build-docker_part_* || true)
-
-        # If there is more than one part, loop over each part and upload them
-        if [ $(echo "$file_list" | wc -l) -gt 1 ]; then
-          for part in $file_list; do
-            echo "Uploading $part"
-            curl -XPOST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Content-Type: application/gzip" \
-              --data-binary @"$part" \
-              "${{ steps.create_release.outputs.upload_url }}?name=$(basename $part)"
-          done
-        else
-          # If only one part exists, upload it directly
-          part=$(echo "$file_list")
-          echo "Uploading single part $part"
-          curl -XPOST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/gzip" \
-            --data-binary @"$part" \
-            "${{ steps.create_release.outputs.upload_url }}?name=$(basename $part)"
-        fi
+    - name: Upload Docker parts to GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          pre-immortalwrt-build-docker_part_*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
