@@ -64,7 +64,7 @@ jobs:
 
     - name: Split the tar file into smaller chunks
       run: |
-        split -b 24m pre-immortalwrt-build-docker.tar.gz "pre-immortalwrt-build-docker_part_"
+        7z a -v24m pre-immortalwrt-build-docker.tar.gz.7z pre-immortalwrt-build-docker.tar.gz
         ls -lh pre-immortalwrt-build-docker_part_*
 
     - name: Create Git tag
