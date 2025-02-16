@@ -43,5 +43,5 @@ find /home/user/openwrt/bin/targets -mindepth 1 -not -name 'targets' -exec mv -t
 
 
 
-To do：
+# To do：
 在 tag 中区分 immortalwrt 的 branches，当前为 openwrt-24.10
