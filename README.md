@@ -33,7 +33,7 @@ rm pre-immortalwrt-build-docker.tar.gz
  ````
 #复制你的.config 到 /openwrt（本机）
 
-# 运行容器
+#运行容器
  ````
 sudo docker run -it -v /openwrt:/home/user/target --name immortalwrt-build-container immortalwrt_build bash
  ````
