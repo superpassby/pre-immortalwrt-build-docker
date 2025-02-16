@@ -55,8 +55,12 @@ jobs:
 
     - name: Save Docker image to a tar file
       run: |
+        echo "执行 docker images"
+        docker images
+        echo "执行docker save pre-immortalwrt-build-docker..."
         docker save pre-immortalwrt-build-docker | gzip > pre-immortalwrt-build-docker.tar.gz
-
+        echo "执行 ls -lh pre-immortalwrt-build-docker.tar.gz"
+        ls -lh pre-immortalwrt-build-docker.tar.gz
     - name: Split the tar file into smaller chunks
       run: |
         split -b 1024m pre-immortalwrt-build-docker.tar.gz "pre-immortalwrt-build-docker_part_"
