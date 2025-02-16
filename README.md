@@ -42,7 +42,7 @@ cd openwrt
 
 git pull
  ````
-#复制你自定义源并更新
+#复制你的自定义源并更新
  ````
 git clone --depth=1 https://github.com/sirpdboy/luci-app-lucky.git package/lucky
 
