@@ -64,30 +64,39 @@ jobs:
 
     - name: Split the tar file into smaller chunks
       run: |
-       split -b 1024m pre-immortalwrt-build-docker.tar.gz "pre-immortalwrt-build-docker_part_"
-       echo "执行 ls -lh pre-immortalwrt-build-docker_part_*"
-       ls -lh pre-immortalwrt-build-docker_part_*
-
-    - name: Upload Docker image parts as artifacts
-      uses: actions/upload-artifact@main
-      with:
-        name: docker-image-parts
-        path: pre-immortalwrt-build-docker_part_*
+        split -b 1024m pre-immortalwrt-build-docker.tar.gz "pre-immortalwrt-build-docker_part_"
+        ls -lh pre-immortalwrt-build-docker_part_*
 
     - name: Create GitHub release
       id: create_release
       uses: actions/create-release@main
       with:
-        tag_name: v1.0.1  # 在此填写您的版本号，根据需要修改
-        release_name: "Docker Image Release"  # 发布名称
-        body: "Release of pre-immortalwrt-build-docker image"  # 发布说明
+        tag_name: v1.0.1
+        release_name: "Docker Image Release"
+        body: "Release of pre-immortalwrt-build-docker image"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Upload image parts to GitHub release
-      uses: actions/upload-release-asset@v1
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: pre-immortalwrt-build-docker_part_*
-        asset_name: ${{ github.run_id }}-pre-immortalwrt-build-docker_part.tar.gz
-        asset_content_type: application/gzip
+    - name: Upload Docker image parts to GitHub release
+      run: |
+        # Get the list of files that match the pattern
+        file_list=$(ls pre-immortalwrt-build-docker_part_* || true)
+
+        # If there is more than one part, loop over each part and upload them
+        if [ $(echo "$file_list" | wc -l) -gt 1 ]; then
+          for part in $file_list; do
+            echo "Uploading $part"
+            curl -XPOST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Content-Type: application/gzip" \
+              --data-binary @"$part" \
+              "${{ steps.create_release.outputs.upload_url }}?name=$(basename $part)"
+          done
+        else
+          # If only one part exists, upload it directly
+          part=$(echo "$file_list")
+          echo "Uploading single part $part"
+          curl -XPOST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/gzip" \
+            --data-binary @"$part" \
+            "${{ steps.create_release.outputs.upload_url }}?name=$(basename $part)"
+        fi
