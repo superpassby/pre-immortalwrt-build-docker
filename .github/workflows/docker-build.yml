@@ -130,6 +130,7 @@ jobs:
         echo "Deleting old releases..."
         RELEASES=$(curl -s -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
           "https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/releases")
+        # 按创建时间排序，并排除最近的三个版本
         RELEASE_IDS=$(echo $RELEASES | jq '. | sort_by(.created_at) | reverse | .[3:] | .[].id')
         for RELEASE_ID in $(echo $RELEASE_IDS); do
           RELEASE_NAME=$(echo $RELEASES | jq -r ".[] | select(.id == $RELEASE_ID) | .name")
@@ -143,6 +144,7 @@ jobs:
         echo "Deleting old tags..."
         TAGS=$(curl -s -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
           "https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/tags")
+        # 按创建时间排序，并排除最近的三个标签
         TAG_NAMES=$(echo $TAGS | jq '. | sort_by(.commit.committer.date) | reverse | .[3:] | .[].name')
         for TAG_NAME in $(echo $TAG_NAMES | tr -d '"'); do
           echo "Deleting tag: $TAG_NAME"
