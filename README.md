@@ -7,7 +7,7 @@
 
 使用本项目，可大幅缩短编译时间，配合 github action 使用更佳
 
-使用方法：
+#使用方法：
 
 # 从本项目下载最新镜像
 tag=$(curl -s https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/releases/latest | jq -r '.tag_name')
