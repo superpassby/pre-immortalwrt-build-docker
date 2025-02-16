@@ -78,7 +78,7 @@ jobs:
     - name: Upload Docker parts to GitHub Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ github.ref }}
+        tag_name: ${{ github.ref_name }}  # 这是关键：直接提取标签名
         files: |
           pre-immortalwrt-build-docker_part_*
       env:
