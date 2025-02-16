@@ -137,12 +137,18 @@ jobs:
 
     - name: Delete old tags
       run: |
-        echo "Deleting old releases..."
+        echo "Deleting old tags, keeping the latest 3 tags..."
         TAGS=$(curl -s -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
           "https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/tags")
         TAG_IDS=$(echo $TAGS | jq 'sort_by(.commit.committer.date) | reverse | .[3:] | .[].name')
+        
+        # 删除标签
         for TAG_NAME in $(echo $TAG_IDS | tr -d '"'); do
-          echo "Deleting tag: $TAG_NAME"
-          git tag -d $TAG_NAME  # 删除本地标签
-          git push --delete origin $TAG_NAME  # 删除远程标签
+          if git show-ref --tags | grep -q "refs/tags/$TAG_NAME"; then
+            echo "Deleting tag: $TAG_NAME"
+            git tag -d $TAG_NAME  # 删除本地标签
+            git push --delete origin $TAG_NAME  # 删除远程标签
+          else
+            echo "Tag $TAG_NAME not found, skipping deletion."
+          fi
         done
