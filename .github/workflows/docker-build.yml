@@ -144,7 +144,7 @@ jobs:
         echo "Deleting old tags..."
         TAGS=$(curl -s -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
           "https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/tags")
-        # 按创建时间排序，并排除最近的三个标签
+        # 按照创建时间 'commit.committer.date' 排序，确保删除较旧的标签
         TAG_NAMES=$(echo $TAGS | jq '. | sort_by(.commit.committer.date) | reverse | .[3:] | .[].name')
         for TAG_NAME in $(echo $TAG_NAMES | tr -d '"'); do
           echo "Deleting tag: $TAG_NAME"
