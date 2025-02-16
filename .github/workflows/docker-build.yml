@@ -62,7 +62,7 @@ jobs:
         split -b 1024m pre-immortalwrt-build-docker.tar.gz "pre-immortalwrt-build-docker_part_"
 
     - name: Upload Docker image parts as artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: docker-image-parts
         path: pre-immortalwrt-build-docker_part_*
