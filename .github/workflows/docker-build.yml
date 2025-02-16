@@ -9,7 +9,7 @@ on:
 #    - cron: '0 1 * * *'  # 每天凌晨 1 点 UTC，按需求调整时间
 
 jobs:
-  build:
+  build_and_release:
     runs-on: ubuntu-latest
     
     steps:
@@ -61,6 +61,7 @@ jobs:
         docker save pre-immortalwrt-build-docker | gzip > pre-immortalwrt-build-docker.tar.gz
         echo "执行 ls -lh pre-immortalwrt-build-docker.tar.gz"
         ls -lh pre-immortalwrt-build-docker.tar.gz
+
     - name: Split the tar file into smaller chunks
       run: |
         split -b 1024m pre-immortalwrt-build-docker.tar.gz "pre-immortalwrt-build-docker_part_"
@@ -71,43 +72,20 @@ jobs:
         name: docker-image-parts
         path: pre-immortalwrt-build-docker_part_*
 
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@main
+    - name: Create GitHub release
+      id: create_release
+      uses: actions/create-release@main
+      with:
+        tag_name: v1.0.1  # 在此填写您的版本号，根据需要修改
+        release_name: "Docker Image Release"  # 发布名称
+        body: "Release of pre-immortalwrt-build-docker image"  # 发布说明
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create GitHub release
-        id: create_release
-        uses: actions/create-release@main
-        with:
-          tag_name: v1.0.0  # 在此填写您的版本号，根据需要修改
-          release_name: "Docker Image Release"  # 发布名称
-          body: "Release of pre-immortalwrt-build-docker image"  # 发布说明
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Show disk space
-        run: |
-          echo "Show files"
-          echo "=============================================================================="
-          echo "pwd============================================================="
-          pwd
-          echo "ls /home/runner/work/pre-immortalwrt-build-docker/pre-immortalwrt-build-docker============================================================="
-          ls /home/runner/work/pre-immortalwrt-build-docker/pre-immortalwrt-build-docker
-          echo "ls /home/runner/work/pre-immortalwrt-build-docker============================================================="
-          ls /home/runner/work/pre-immortalwrt-build-docker
-          echo "ls /home/runner/work============================================================="
-          ls /home/runner/work
-          echo "ls -lh============================================================="
-          ls -lh
-          echo "==============================================================================" 
-
-      - name: Upload image parts to GitHub release
-        uses: actions/upload-release-asset@v1  # 使用官方上传 release 资产的动作
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: pre-immortalwrt-build-docker_part_*
-          asset_name: ${{ github.run_id }}-pre-immortalwrt-build-docker_part.tar.gz
-          asset_content_type: application/gzip
+    - name: Upload image parts to GitHub release
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: pre-immortalwrt-build-docker_part_*
+        asset_name: ${{ github.run_id }}-pre-immortalwrt-build-docker_part.tar.gz
+        asset_content_type: application/gzip
