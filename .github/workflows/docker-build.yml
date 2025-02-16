@@ -126,7 +126,7 @@ jobs:
         done
 
     - name: Delete old releases
-      if: false  # 跳过该步骤
+      #if: false  # 跳过该步骤
       run: |
         echo "Deleting old releases..."
         RELEASES=$(curl -s -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
@@ -138,29 +138,22 @@ jobs:
           "https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/releases/$RELEASE_ID"
         done
 
-    - name: Delete old releases and associated tags
+    
+    - name: Delete old tags
       run: |
-        echo "Deleting old releases and associated tags..."
+        echo "Deleting old tags..."
 
-        # 获取所有 Releases
-        RELEASES=$(curl -s -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
-          "https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/releases")
+        # 获取所有标签信息
+        TAGS=$(curl -s -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
+          "https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/tags")
 
-        # 提取 Release ID 和标签名
-        RELEASE_IDS=$(echo $RELEASES | jq '. | sort_by(.created_at) | reverse | .[3:] | .[].id')
-        TAG_NAMES=$(echo $RELEASES | jq '. | sort_by(.created_at) | reverse | .[3:] | .[].tag_name')
+        # 提取标签名称和创建时间
+        TAG_NAMES=$(echo $TAGS | jq '. | sort_by(.commit.committer.date) | reverse | .[3:] | .[].name')
 
-        # 删除 Release 和标签
-        for RELEASE_ID in $(echo $RELEASE_IDS | tr -d '"'); do
-          # 获取 Release 对应的 TAG_NAME
-          TAG_NAME=$(echo $RELEASES | jq -r ".[] | select(.id == \"$RELEASE_ID\") | .tag_name")
-          echo "Deleting Release: $RELEASE_ID with tag: $TAG_NAME"
-      
-          # 删除 Release
+        # 删除除最新三个标签外的所有标签
+        for TAG_NAME in $(echo $TAG_NAMES | tr -d '"'); do
+          echo "Deleting tag: $TAG_NAME"
           curl -X DELETE -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
-          "https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/releases/$RELEASE_ID"
-      
-          # 删除 Git 标签
-          curl -X DELETE -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
-          "https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/git/refs/tags/$TAG_NAME"  # 删除远程标签
+          "https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/git/refs/tags/$TAG_NAME"
         done
+
