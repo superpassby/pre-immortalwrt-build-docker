@@ -64,13 +64,14 @@ jobs:
 
     - name: Split the tar file into smaller chunks
       run: |
-        split -b 1024m pre-immortalwrt-build-docker.tar.gz "pre-immortalwrt-build-docker_part_"
+       split -b 1024m pre-immortalwrt-build-docker.tar.gz "pre-immortalwrt-build-docker_part_"
+       ls -lh pre-immortalwrt-build-docker_part_*
 
     - name: Upload Docker image parts as artifacts
       uses: actions/upload-artifact@main
       with:
-        name: docker-image-parts
-        path: pre-immortalwrt-build-docker_part_*
+      name: docker-image-parts
+      path: pre-immortalwrt-build-docker_part_*
 
     - name: Create GitHub release
       id: create_release
