@@ -1,0 +1,56 @@
+FROM debian:11
+
+# 设置工作目录
+WORKDIR /root
+USER root
+
+# 安装所需的工具和依赖
+RUN apt update -qq && apt-get install -qqy --no-install-recommends \
+    sudo \
+    curl \
+    git \
+    wget \
+    unzip \
+    rsync \
+    tmux \
+    zsh \
+    p7zip-full
+
+# 创建一个用户来执行编译（避免使用 root 权限）
+RUN useradd -m user
+
+# 为 user 用户设置免密码 sudo 权限
+RUN echo "user ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/user && \
+    chmod 0440 /etc/sudoers.d/user
+
+# 切换到 user 用户
+USER user
+WORKDIR /home/user
+
+# 安装 ImmortalWrt 编译环境
+RUN sudo bash -c 'bash <(curl -s https://build-scripts.immortalwrt.org/init_build_environment.sh)'
+
+# 下载源码
+RUN branch="openwrt-24.10" && \
+    git clone -b $branch --single-branch --filter=blob:none https://github.com/immortalwrt/immortalwrt openwrt
+
+# Install Feeds
+RUN cd openwrt && \
+    ./scripts/feeds update -a && \
+    ./scripts/feeds install -a && \
+    make defconfig
+
+# Download DL Package
+RUN cd openwrt && \
+    make download -j8
+
+# Compile Firmware
+RUN cd openwrt && \
+    make -j$(nproc) V=s
+
+# 清理缓存数据
+RUN sudo apt clean && \
+    sudo rm -rf /var/lib/apt/lists/*
+
+# 设置容器启动命令（如果需要）
+CMD ["bash"]
