@@ -84,6 +84,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Show disk space
+        run: |
+          echo "Show files"
+          echo "=============================================================================="
+          pwd
+          ls -lh
+          echo "==============================================================================" 
+
       - name: Upload image parts to GitHub release
         uses: actions/upload-release-asset@v1  # 使用官方上传 release 资产的动作
         with:
