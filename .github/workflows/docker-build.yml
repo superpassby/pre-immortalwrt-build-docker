@@ -13,45 +13,60 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # Step 1: Checkout the code
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      # Step 2: Set up Docker Buildx (用于跨平台构建)
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+    - name: Check Server Performance
+      run: |
+        echo "--------------------------CPU信息--------------------------"
+        echo "CPU物理数量: $(cat /proc/cpuinfo | grep "physical id" | sort | uniq | wc -l)"
+        echo "CPU核心数量: $(nproc)"
+        echo -e "CPU型号信息:$(cat /proc/cpuinfo | grep -m1 name | awk -F: '{print $2}')\n"
+        echo "--------------------------内存信息--------------------------"
+        echo "已安装内存详细信息:"
+        echo -e "$(sudo lshw -short -C memory | grep GiB)\n"
+        echo "--------------------------硬盘信息--------------------------"
+        echo "硬盘数量: $(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
 
-      # Step 3: Build Docker image
-      - name: Build Docker image
-        run: |
-          docker build -t pre-immortalwrt-build-docker .
+    - name: Initialization Environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo apt-get -y purge azure-cli* docker* ghc* zulu* hhvm* llvm* firefox* google* dotnet* aspnetcore* powershell* openjdk* adoptopenjdk* mysql* php* mongodb* moby* snap* || true
+        sudo -E apt-get -y update
+        sudo -E systemctl daemon-reload
+        sudo -E apt-get -y autoremove --purge
+        sudo -E apt-get -y clean
+        sudo timedatectl set-timezone "$TZ"
 
-      # Step 4: Save the Docker image to a tar file
-      - name: Save Docker image to a tar file
-        run: |
-          docker save pre-immortalwrt-build-docker | gzip > pre-immortalwrt-build-docker.tar.gz
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
 
-      # Step 5: Split the tar file into smaller chunks (each <= 1024MB)
-      - name: Split the tar file into smaller chunks
-        run: |
-          split -b 1024m pre-immortalwrt-build-docker.tar.gz "pre-immortalwrt-build-docker_part_"
+    - name: Build Docker image
+      run: |
+        docker build -t pre-immortalwrt-build-docker .
 
-      # Step 6: Upload the parts as artifacts
-      - name: Upload Docker image parts as artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: docker-image-parts
-          path: pre-immortalwrt-build-docker_part_*
+    - name: Save Docker image to a tar file
+      run: |
+        docker save pre-immortalwrt-build-docker | gzip > pre-immortalwrt-build-docker.tar.gz
+
+    - name: Split the tar file into smaller chunks
+      run: |
+        split -b 1024m pre-immortalwrt-build-docker.tar.gz "pre-immortalwrt-build-docker_part_"
+
+    - name: Upload Docker image parts as artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: docker-image-parts
+        path: pre-immortalwrt-build-docker_part_*
 
   release:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout the code again in the release job
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Step 2: Create a new release on GitHub
       - name: Create GitHub release
         id: create_release
         uses: actions/create-release@v1
@@ -62,7 +77,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Step 3: Upload image parts to GitHub release
       - name: Upload image parts to GitHub release
         uses: gh-cli/upload-release-asset@v1
         with:
