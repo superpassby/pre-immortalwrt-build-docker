@@ -1,0 +1,72 @@
+name: Docker Build and Release
+
+on:
+  # 手动触发
+  workflow_dispatch:
+
+  # 定时触发 (例如每天凌晨 1 点触发)
+#  schedule:
+#    - cron: '0 1 * * *'  # 每天凌晨 1 点 UTC，按需求调整时间
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 2: Set up Docker Buildx (用于跨平台构建)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Step 3: Build Docker image
+      - name: Build Docker image
+        run: |
+          docker build -t pre-immortalwrt-build-docker .
+
+      # Step 4: Save the Docker image to a tar file
+      - name: Save Docker image to a tar file
+        run: |
+          docker save pre-immortalwrt-build-docker | gzip > pre-immortalwrt-build-docker.tar.gz
+
+      # Step 5: Split the tar file into smaller chunks (each <= 1024MB)
+      - name: Split the tar file into smaller chunks
+        run: |
+          split -b 1024m pre-immortalwrt-build-docker.tar.gz "pre-immortalwrt-build-docker_part_"
+
+      # Step 6: Upload the parts as artifacts
+      - name: Upload Docker image parts as artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: docker-image-parts
+          path: pre-immortalwrt-build-docker_part_*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout the code again in the release job
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 2: Create a new release on GitHub
+      - name: Create GitHub release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: v1.0.0  # 在此填写您的版本号，根据需要修改
+          release_name: "Docker Image Release"  # 发布名称
+          body: "Release of pre-immortalwrt-build-docker image"  # 发布说明
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Step 3: Upload image parts to GitHub release
+      - name: Upload image parts to GitHub release
+        uses: gh-cli/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: pre-immortalwrt-build-docker_part_*
+          asset_name: ${{ github.run_id }}-pre-immortalwrt-build-docker_part.tar.gz
+          asset_content_type: application/gzip
