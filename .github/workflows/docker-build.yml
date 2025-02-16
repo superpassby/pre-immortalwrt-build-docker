@@ -65,7 +65,7 @@ jobs:
     - name: Split the tar file into smaller chunks
       run: |
         7z a -v24m pre-immortalwrt-build-docker.tar.gz.7z pre-immortalwrt-build-docker.tar.gz
-        ls -lh pre-immortalwrt-build-docker_part_*
+        ls -lh pre-immortalwrt-build-docker.*
 
     - name: Create Git tag
       run: |
@@ -80,6 +80,6 @@ jobs:
       with:
         tag_name: ${{ github.ref_name }}  # 这是关键：直接提取标签名
         files: |
-          pre-immortalwrt-build-docker_part_*
+          pre-immortalwrt-build-docker.*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
