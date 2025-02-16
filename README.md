@@ -17,6 +17,16 @@ curl -s https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/re
   | jq -r '.assets[].browser_download_url' \
   | xargs -n 1 wget
 
+ ````
+tag=$(curl -s https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/releases/latest | jq -r '.tag_name')
+echo "下载的 tag: $tag"
+curl -s https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/releases/latest \
+  | jq -r '.assets[].browser_download_url' \
+  | xargs -n 1 wget
+ ````
+
+
+
 #解压到当前目录（不保留压缩包），导入镜像到docker并删除原 *.tar.gz
 
 7z x pre-immortalwrt-build-docker.tar.gz.7z.001 -o./
