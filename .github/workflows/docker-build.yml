@@ -81,7 +81,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         #tag_name: ${{ github.ref_name }}  # 这是关键：直接提取标签名
-        tag_name: ${{ steps.create_tag.outputs.tag_name }}  # 使用新创建的标签
+        tag_name: ${{ steps.create_tag.outputs.TAG_NAME }}  # 使用创建标签的输出
         files: |
           pre-immortalwrt-build-docker.*
       env:
