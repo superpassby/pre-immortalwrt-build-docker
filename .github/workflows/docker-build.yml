@@ -39,7 +39,7 @@ jobs:
 
     - name: "Optimize Disk Space"
       uses: "hugoalh/disk-space-optimizer-ghaction@v0.8.1"
-      if: false  # 跳过该步骤
+      #if: false  # 跳过该步骤
       #if: true  # 该步骤会执行
       with:
         operate_sudo: "True"
