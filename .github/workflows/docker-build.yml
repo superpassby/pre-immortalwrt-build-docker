@@ -88,6 +88,6 @@ jobs:
       with:
           tag_name: ${{ env.TAG_NAME }}  # 从环境变量中获取标签名
           files: |
-              pre-immortalwrt-build-docker.*
+              pre-immortalwrt-build-docker.tar.gz.*
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
