@@ -67,23 +67,27 @@ jobs:
         7z a -v24m pre-immortalwrt-build-docker.tar.gz.7z pre-immortalwrt-build-docker.tar.gz
         ls -lh pre-immortalwrt-build-docker.*
 
+#jobs:
+#  build_and_release:
+#    runs-on: ubuntu-latest
+
     - name: Create Git tag
       id: create_tag  # 给步骤添加一个 id
       run: |
-        TAG_NAME="v$(date +'%Y%m%d%H%M%S')"  # 基于当前时间生成唯一标签
-        echo "TAG_NAME=${TAG_NAME}"  # 显示标签名
-        git tag $TAG_NAME  # 创建新的 Git 标签
-        git push origin $TAG_NAME  # 推送标签到远程仓库
-        git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/superpassby/pre-immortalwrt-build-docker $TAG_NAME  # 使用 PAT 推送标签
+         TAG_NAME="v$(date +'%Y%m%d%H%M%S')"  # 基于当前时间生成唯一标签
+         echo "TAG_NAME=${TAG_NAME}"  # 显示标签名
+         git tag $TAG_NAME  # 创建新的 Git 标签
+         git push origin $TAG_NAME  # 推送标签到远程仓库
+         git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/superpassby/pre-immortalwrt-build-docker $TAG_NAME  # 使用 PAT 推送标签
+         echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV  # 将标签名存储在环境变量中，供后续步骤使用
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload Docker parts to GitHub Release
       uses: softprops/action-gh-release@v1
       with:
-        #tag_name: ${{ github.ref_name }}  # 这是关键：直接提取标签名
-        tag_name: ${{ steps.create_tag.outputs.TAG_NAME }}  # 使用创建标签的输出
-        files: |
-          pre-immortalwrt-build-docker.*
+          tag_name: ${{ env.TAG_NAME }}  # 从环境变量中获取标签名
+          files: |
+              pre-immortalwrt-build-docker.*
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
