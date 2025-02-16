@@ -67,6 +67,14 @@ jobs:
         split -b 1024m pre-immortalwrt-build-docker.tar.gz "pre-immortalwrt-build-docker_part_"
         ls -lh pre-immortalwrt-build-docker_part_*
 
+    - name: Create Git tag
+      run: |
+        TAG_NAME="v$(date +'%Y%m%d%H%M%S')"
+        git tag $TAG_NAME
+        git push origin $TAG_NAME
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Upload Docker parts to GitHub Release
       uses: softprops/action-gh-release@v1
       with:
