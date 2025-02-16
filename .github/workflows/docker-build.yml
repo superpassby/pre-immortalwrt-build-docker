@@ -151,9 +151,9 @@ jobs:
         TAG_NAMES=$(echo $RELEASES | jq '. | sort_by(.created_at) | reverse | .[3:] | .[].tag_name')
 
         # 删除 Release 和标签
-        for RELEASE_ID in $(echo $RELEASE_IDS); do
-          RELEASE_ID=$(echo $RELEASE_ID | tr -d '"')  # 去掉多余的引号
-          TAG_NAME=$(echo $TAG_NAMES | jq -r ".[] | select(. == \"${RELEASE_ID}\")")
+        for RELEASE_ID in $(echo $RELEASE_IDS | tr -d '"'); do
+          # 获取 Release 对应的 TAG_NAME
+          TAG_NAME=$(echo $RELEASES | jq -r ".[] | select(.id == \"$RELEASE_ID\") | .tag_name")
           echo "Deleting Release: $RELEASE_ID with tag: $TAG_NAME"
       
           # 删除 Release
