@@ -1,12 +1,12 @@
 # pre-immortalwrt-build-docker
 
-用于编译 immortalwrt 的 docker 环境
-使用 https://github.com/immortalwrt/immortalwrt 最新源码，debian 11 环境，已完成 Requirements 的安装并使用默认配置进行了预编译
-
+本项目用于构建编译 immortalwrt 所需的 docker 环境
 适用编译对象：x86_64;immortalwrt 24.10
 
+# 特点
+同步 https://github.com/immortalwrt/immortalwrt 最新源码，使用官方推荐 debian 11 环境，已完成 Requirements 的安装并使用默认配置进行了预编译。
 使用本项目，可大幅缩短编译时间，同时因使用docker镜像编译，保证了环境的一致性。
-本项目配合 github action 使用更佳
+本项目配合 github action 使用更佳。
 
 # 使用方法：
 
