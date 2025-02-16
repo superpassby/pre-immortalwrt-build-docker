@@ -39,6 +39,13 @@ jobs:
         sudo -E apt-get -y clean
         sudo timedatectl set-timezone "$TZ"
 
+    - name: Show disk space
+      run: |
+        echo "Show disk space"
+        echo "=============================================================================="
+        df -hT
+        echo "=============================================================================="
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
