@@ -161,6 +161,6 @@ jobs:
           "https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/releases/$RELEASE_ID"
       
           # 删除 Git 标签
-          git tag -d $TAG_NAME  # 删除本地标签
-          git push --delete origin $TAG_NAME  # 删除远程标签
+          curl -X DELETE -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
+          "https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/git/refs/tags/$TAG_NAME"  # 删除远程标签
         done
