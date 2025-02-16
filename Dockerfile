@@ -26,7 +26,7 @@ USER user
 WORKDIR /home/user
 
 # 安装 ImmortalWrt 编译环境
-RUN sudo bash -c 'bash <(curl -s https://build-scripts.immortalwrt.org/init_build_environment.sh)'
+# RUN sudo bash -c 'bash <(curl -s https://build-scripts.immortalwrt.org/init_build_environment.sh)'
 
 # 下载源码
 RUN branch="openwrt-24.10" && \
