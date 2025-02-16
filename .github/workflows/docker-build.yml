@@ -83,7 +83,7 @@ jobs:
 
     - name: Split the tar file into smaller chunks
       run: |
-        7z a -v24m pre-immortalwrt-build-docker.tar.gz.7z pre-immortalwrt-build-docker.tar.gz
+        7z a -v1024m pre-immortalwrt-build-docker.tar.gz.7z pre-immortalwrt-build-docker.tar.gz
         ls -lh pre-immortalwrt-build-docker.*
 
 #jobs:
