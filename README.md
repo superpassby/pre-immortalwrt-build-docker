@@ -58,5 +58,7 @@ find /home/user/openwrt/bin/targets -mindepth 1 -not -name 'targets' -exec mv -t
 # To do：
 
 1、在 tag 中区分 immortalwrt 的 branches，当前为 openwrt-24.10
+
 2、完成 进行编译的 github action 项目
-目前仅支持 x86_64 的 immortalwrt ，暂不考虑支持其他平台和分支，如有需要可clone我的源码进行修改。
+
+注：目前仅支持 x86_64 的 immortalwrt ，暂不考虑支持其他平台和分支，如有需要可clone我的源码进行修改。
