@@ -10,6 +10,7 @@
 # 使用方法：
 
 #从本项目下载最新镜像
+
 tag=$(curl -s https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/releases/latest | jq -r '.tag_name')
 echo "下载的 tag: $tag"
 curl -s https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/releases/latest \
