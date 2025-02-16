@@ -85,7 +85,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload image parts to GitHub release
-        uses: gh-cli/upload-release-asset@main
+        uses: actions/upload-release-asset@v1  # 使用官方上传 release 资产的动作
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: pre-immortalwrt-build-docker_part_*
