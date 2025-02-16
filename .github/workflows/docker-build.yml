@@ -95,7 +95,7 @@ jobs:
     - name: Create Git tag
       id: create_tag  # 给步骤添加一个 id
       run: |
-         TAG_NAME="x86_64_$(date +'%Y.%m.%d-%H:%M')"  # 基于当前年、月、日、小时、分钟生成唯一标签
+         TAG_NAME="x86_64_$(date +'%Y.%m.%d-%H_%M')"  # 基于当前年、月、日、小时、分钟生成唯一标签
          echo "TAG_NAME=${TAG_NAME}"  # 显示标签名
          git tag $TAG_NAME  # 创建新的 Git 标签
          git push origin $TAG_NAME  # 推送标签到远程仓库
