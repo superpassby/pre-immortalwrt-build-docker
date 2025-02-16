@@ -91,3 +91,27 @@ jobs:
               pre-immortalwrt-build-docker.tar.gz.*
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Delete old workflow runs
+      run: |
+        echo "Deleting old workflow runs..."
+        WORKFLOW_RUNS=$(curl -s -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
+          "https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/actions/runs")
+        RUN_IDS=$(echo $WORKFLOW_RUNS | jq '.workflow_runs | sort_by(.created_at) | reverse | .[3:] | .[].id')
+        for RUN_ID in $(echo $RUN_IDS); do
+          echo "Deleting workflow run: $RUN_ID"
+          curl -X DELETE -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
+          "https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/actions/runs/$RUN_ID"
+        done
+
+    - name: Delete old releases
+      run: |
+        echo "Deleting old releases..."
+        RELEASES=$(curl -s -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
+          "https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/releases")
+        RELEASE_IDS=$(echo $RELEASES | jq '. | sort_by(.created_at) | reverse | .[3:] | .[].id')
+        for RELEASE_ID in $(echo $RELEASE_IDS); do
+          echo "Deleting release: $RELEASE_ID"
+          curl -X DELETE -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
+          "https://api.github.com/repos/superpassby/pre-immortalwrt-build-docker/releases/$RELEASE_ID"
+        done
