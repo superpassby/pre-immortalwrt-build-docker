@@ -72,14 +72,13 @@ jobs:
 
       - name: Set up GitHub Release
         id: create_release
-        uses: actions/create-release@main
+        uses: softprops/action-gh-release@main
         with:
-          tag_name: ${{ needs.Building.outputs.tag_name }}
-          release_name: "Latest Release"
+          files: |
+            artifacts/${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}_build/*
           body: "Release with multiple builds"
-          draft: false
-          prerelease: false
-          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Build Artifacts to Release
         uses: actions/upload-release-asset@main
