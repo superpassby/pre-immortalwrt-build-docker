@@ -123,10 +123,6 @@ jobs:
         7z a -v1024m ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz.7z ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz
         ls -lh ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.*
 
-#jobs:
-#  build_and_release:
-#    runs-on: ubuntu-latest
-
     - name: Create Git tag
       id: create_tag  # 给步骤添加一个 id
       run: |
