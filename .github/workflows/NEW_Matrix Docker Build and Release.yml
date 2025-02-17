@@ -15,51 +15,56 @@ jobs:
         branch: [openwrt-24.10]
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Determine branch
-      id: set_branch
-      run: |
-        if [[ "${{ matrix.version }}" == "immortalwrt" || "${{ matrix.version }}" == "openwrt" ]]; then
-          echo "branch=${{ matrix.branch }}" >> $GITHUB_ENV
-        elif [[ "${{ matrix.version }}" == "lede" ]]; then
-          if [[ "${{ matrix.branch }}" == "openwrt-24.10" ]]; then
-            echo "branch=master" >> $GITHUB_ENV
-          else
-            exit 0
+      - name: Determine branch
+        id: set_branch
+        run: |
+          if [[ "${{ matrix.version }}" == "immortalwrt" || "${{ matrix.version }}" == "openwrt" ]]; then
+            echo "branch=${{ matrix.branch }}" >> $GITHUB_ENV
+          elif [[ "${{ matrix.version }}" == "lede" ]]; then
+            if [[ "${{ matrix.branch }}" == "openwrt-24.10" ]]; then
+              echo "branch=master" >> $GITHUB_ENV
+            else
+              exit 0
+            fi
+          elif [[ "${{ matrix.version }}" == "lienol" ]]; then
+            branch_name=$(echo "${{ matrix.branch }}" | sed 's/^openwrt-//')
+            echo "branch=${branch_name}" >> $GITHUB_ENV
           fi
-        elif [[ "${{ matrix.version }}" == "lienol" ]]; then
-          branch_name=$(echo "${{ matrix.branch }}" | sed 's/^openwrt-//')
-          echo "branch=${branch_name}" >> $GITHUB_ENV
-        fi
 
-    - name: Build Docker image
-      run: |
-        docker build -t ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }} -f ./${{ matrix.version }}/${{ env.branch }}_${{ matrix.platform }}_Dockerfile .
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }} -f ./${{ matrix.version }}/${{ env.branch }}_${{ matrix.platform }}_Dockerfile .
 
-    - name: Save Docker image to a tar file
-      run: |
-        docker save ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }} | gzip > ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz
+      - name: Save Docker image to a tar file
+        run: |
+          docker save ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }} | gzip > ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz
 
-    - name: Split the tar file into smaller chunks
-      run: |
-        sudo apt-get install -y p7zip-full
-        7z a -v1024m ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz.7z ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz
+      - name: Split the tar file into smaller chunks
+        run: |
+          sudo apt-get install -y p7zip-full
+          7z a -v1024m ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz.7z ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz
 
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@main
-      with:
-        name: ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}_build
-        path: |
-          ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz.7z.*
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@main
+        with:
+          name: ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}_build
+          path: |
+            ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz.7z.*
 
-    - name: Create Git tag
-      id: create_tag
-      run: |
-        TAG_NAME="发布时间（UTC）：$(date +'%Y.%m.%d-%H_%M')"
-        echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
-        echo "::set-output name=tag_name::${TAG_NAME}"
+      - name: Create Git tag
+        id: create_tag
+        run: |
+          TAG_NAME="发布时间（UTC）：$(date +'%Y.%m.%d-%H_%M')"
+          echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
+          git tag -a "$TAG_NAME" -m "Release for $TAG_NAME"
+          git push origin "$TAG_NAME"
+          
+        # 设置输出 TAG_NAME
+        outputs:
+          tag_name: ${{ env.TAG_NAME }}
 
   Release:
     needs: Building
@@ -74,7 +79,7 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.TAG_NAME }}  # 使用创建的标签
+          tag_name: ${{ needs.Building.outputs.tag_name }}  # 使用 Building 作业输出的标签
           files: |
             artifacts/${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}_build/*
           body: "Release with multiple builds"
