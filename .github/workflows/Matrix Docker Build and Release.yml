@@ -14,18 +14,24 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [immortalwrt, openwrt, lede]
-        platform: [x86_64, arm64]
-        branch: ${{ 
-          github.event.inputs.version == 'immortalwrt' && 'openwrt-24.10,openwrt-23.05' ||
-          github.event.inputs.version == 'lede' && 'master' ||
-          github.event.inputs.version == 'openwrt' && 'openwrt-24.10,openwrt-23.05'
-        }}
-   
-    
+        #version: [immortalwrt, openwrt]
+        version: [immortalwrt]
+        platform: [x86_64]
+       
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+
+    - name: Determine branch
+      id: set_branch
+      run: |
+        if [ "${{ matrix.version }}" == "immortalwrt" ]; then
+          echo "Branching for immortalwrt"
+          echo "branch=openwrt-24.10,openwrt-23.05" >> $GITHUB_ENV
+        elif [ "${{ matrix.version }}" == "openwrt" ]; then
+          echo "Branching for openwrt"
+          echo "branch=openwrt-24.10,openwrt-23.05" >> $GITHUB_ENV
+        fi
 
     - name: Check Server Performance
       run: |
@@ -83,7 +89,7 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -t pre-build-docker -f /${{ matrix.version }}/${{ matrix.branch }}_${{ matrix.platform }}_Dockerfile .
+        docker build -t pre-build-docker -f /${{ matrix.version }}/${{ env.branch }}_${{ matrix.platform }}_Dockerfile .
 
     - name: Save Docker image to a tar file
       run: |
