@@ -9,7 +9,7 @@ on:
 #    - cron: '0 1 * * *'  # 每天凌晨 1 点 UTC，按需求调整时间
 
 jobs:
-  build_and_release:
+  Building:
     runs-on: ubuntu-latest
     
     steps:
