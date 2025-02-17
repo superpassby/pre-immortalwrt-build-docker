@@ -143,6 +143,7 @@ jobs:
         done
 
     - name: Delete old releases
+      if: false  # 跳过该步骤
       run: |
         echo "Deleting old releases..."
         RELEASES=$(curl -s -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
@@ -157,6 +158,7 @@ jobs:
         done
 
     - name: Delete old tags
+      if: false  # 跳过该步骤
       run: |
         echo "Deleting old tags..."
         TAGS=$(curl -s -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
