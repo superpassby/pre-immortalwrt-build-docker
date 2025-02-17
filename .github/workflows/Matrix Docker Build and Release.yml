@@ -94,7 +94,15 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -t pre-build-docker -f /${{ matrix.version }}/${{ env.branch }}_${{ matrix.platform }}_Dockerfile .
+        # 输出当前目录内容
+        echo "Listing current directory:"
+        ls
+        echo "Listing ./${{ matrix.version }}/ directory:"
+        ls ./${{ matrix.version }}/
+        echo "Listing the Dockerfile path:"
+        ls ./${{ matrix.version }}/${{ env.branch }}_${{ matrix.platform }}_Dockerfile
+        # 进行 Docker 构建
+        docker build -t pre-build-docker -f ./${{ matrix.version }}/${{ env.branch }}_${{ matrix.platform }}_Dockerfile .
 
     - name: Save Docker image to a tar file
       run: |
