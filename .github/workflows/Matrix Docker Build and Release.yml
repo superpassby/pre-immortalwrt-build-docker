@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        #version: [immortalwrt, openwrt]
-        version: [immortalwrt]
+        version: [immortalwrt, openwrt]
+        #version: [immortalwrt]
         platform: [x86_64]
        
     steps:
