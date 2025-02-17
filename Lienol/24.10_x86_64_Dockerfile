@@ -14,7 +14,7 @@ RUN apt-get update -qq && apt-get install -qqy --no-install-recommends ack antlr
     python3-pyelftools qemu-utils re2c rsync scons squashfs-tools subversion swig texinfo uglifyjs \
     upx-ucl unzip vim wget xmlto xxd zlib1g-dev zstd sudo \
     flex gawk  grep  libc-dev  perl rsync subversion unzip 
-    无法按照的包：
+    #无法安装的包：
     #diff find getopt install make4.1+ which
 
 # 创建一个用户来执行编译（避免使用 root 权限）
