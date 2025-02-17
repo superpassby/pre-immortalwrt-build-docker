@@ -145,5 +145,25 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
+  release:
+    needs: Building
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
 
+      - name: Set up GitHub Release
+        uses: gh-actions/create-release@v1
+        with:
+          tag_name: ${{ env.TAG_NAME }}  # 使用上面创建的 TAG_NAME
+          release_name: "Latest Release"
+          body: "Release with multiple builds"
+        
+      - name: Upload Build Artifacts to Release
+        uses: gh-actions/upload-release-asset@v1
+        with:
+          release_id: ${{ steps.create-release.outputs.id }}
+          asset_path: ./${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz.*  # 上传所有矩阵任务生成的 tar.gz 文件
+          asset_name: ${{ matrix.version }}-${{ env.branch }}-${{ matrix.platform }}.tar.gz
+          asset_content_type: application/gzip
 
