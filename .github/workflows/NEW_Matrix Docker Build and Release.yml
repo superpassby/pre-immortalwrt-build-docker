@@ -14,9 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        #version: [immortalwrt, openwrt, lede, Lienol]
+        #version: [immortalwrt, openwrt, lede, lienol]
         #version: [immortalwrt, openwrt]
-        version: [immortalwrt, openwrt, lede, Lienol]
+        version: [immortalwrt, openwrt, lede, lienol]
         platform: [x86_64]
         #branch: [openwrt-24.10, openwrt-23.10]  # 默认分支
         branch: [openwrt-24.10]
@@ -37,7 +37,7 @@ jobs:
           else
             exit 0
           fi
-        elif [[ "${{ matrix.version }}" == "Lienol" ]]; then
+        elif [[ "${{ matrix.version }}" == "lienol" ]]; then
           # Remove the "openwrt-" prefix if it's present
           branch_name=$(echo "${{ matrix.branch }}" | sed 's/^openwrt-//')
           echo "branch=${branch_name}" >> $GITHUB_ENV
