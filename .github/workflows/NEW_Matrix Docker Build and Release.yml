@@ -107,8 +107,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.TAG_NAME }}
-          files: |
-            $(find ./artifacts -name "*.tar.gz*")  # 上传解压后的文件
+          files: ./artifacts/* 
           body: "Release with multiple builds"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
