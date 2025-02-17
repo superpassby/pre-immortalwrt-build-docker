@@ -54,7 +54,6 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@main
         with:
-          name: ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}_build
           path: |
             ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz.7z*
 
