@@ -48,50 +48,46 @@ jobs:
           7z a -v1024m ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz.7z ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@main
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}_build
           path: |
             ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz.7z.*
-
-      - name: Create Git tag
-        id: create_tag
-        run: |
-          git config --global user.name "${{ github.actor }}"
-          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
-          
-          TAG_NAME="发布时间（UTC）：$(date +'%Y.%m.%d-%H_%M')"
-          echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
-          git tag -a "$TAG_NAME" -m "Release for $TAG_NAME"
-          git push origin "$TAG_NAME"
-
-    outputs:
-      tag_name: ${{ env.TAG_NAME }}  # 在作业级别定义输出
 
   Release:
     needs: Building
     runs-on: ubuntu-latest
     steps:
       - name: Download build artifacts
-        uses: actions/download-artifact@main
+        uses: actions/download-artifact@v3
         with:
           path: artifacts
+
+      - name: Create Git tag
+        id: create_tag
+        run: |
+          TAG_NAME="发布时间（UTC）：$(date +'%Y.%m.%d-%H_%M')"
+          echo "TAG_NAME=${TAG_NAME}"
+          git tag $TAG_NAME
+          git push origin $TAG_NAME
+          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/superpassby/Build-openwrt-in-docker-pre $TAG_NAME
+          echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
 
       - name: Set up GitHub Release
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.Building.outputs.tag_name }}  # 从 Building 作业中获取 TAG_NAME
+          tag_name: ${{ env.TAG_NAME }}
           files: |
-            artifacts/${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}_build/*
+            artifacts/${{ needs.Building.outputs.version }}_${{ needs.Building.outputs.branch }}_${{ needs.Building.outputs.platform }}_build/*
           body: "Release with multiple builds"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Build Artifacts to Release
-        uses: actions/upload-release-asset@main
+        uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}_build/*
-          asset_name: ${{ matrix.version }}-${{ env.branch }}-${{ matrix.platform }}.tar.gz.7z
+          asset_path: artifacts/${{ needs.Building.outputs.version }}_${{ needs.Building.outputs.branch }}_${{ needs.Building.outputs.platform }}_build/*
+          asset_name: ${{ needs.Building.outputs.version }}-${{ needs.Building.outputs.branch }}-${{ needs.Building.outputs.platform }}.tar.gz.7z
           asset_content_type: application/gzip
