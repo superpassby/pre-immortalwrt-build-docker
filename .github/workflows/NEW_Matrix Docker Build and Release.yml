@@ -71,6 +71,11 @@ jobs:
         uses: actions/download-artifact@main
         with:
           path: ./artifacts/*
+
+      - name: List files in ./artifacts
+        run: |
+          echo "Listing files in ./artifacts after unzipping:"
+          ls -la ./artifacts  # 显示解压后的文件列表
           
       - name: Unzip all artifact files
         run: |
