@@ -107,21 +107,21 @@ jobs:
         echo "Listing the Dockerfile path:"
         ls ./${{ matrix.version }}/${{ env.branch }}_${{ matrix.platform }}_Dockerfile
         # 进行 Docker 构建
-        docker build -t pre-build-docker -f ./${{ matrix.version }}/${{ env.branch }}_${{ matrix.platform }}_Dockerfile .
+        docker build -t ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }} -f ./${{ matrix.version }}/${{ env.branch }}_${{ matrix.platform }}_Dockerfile .
 
     - name: Save Docker image to a tar file
       run: |
         echo "执行 docker images"
         docker images
-        echo "执行docker save pre-build-docker..."
-        docker save pre-build-docker | gzip > pre-build-docker.tar.gz
-        echo "执行 ls -lh pre-build-docker.tar.gz"
-        ls -lh pre-build-docker.tar.gz
+        echo "执行docker save ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}..."
+        docker save ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }} | gzip > ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz
+        echo "执行 ls -lh ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz"
+        ls -lh ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz
 
     - name: Split the tar file into smaller chunks
       run: |
-        7z a -v1024m pre-build-docker.tar.gz.7z pre-build-docker.tar.gz
-        ls -lh pre-build-docker.*
+        7z a -v1024m ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz.7z ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz
+        ls -lh ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.*
 
 #jobs:
 #  build_and_release:
@@ -130,7 +130,7 @@ jobs:
     - name: Create Git tag
       id: create_tag  # 给步骤添加一个 id
       run: |
-         TAG_NAME="${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}_$(date +'%Y.%m.%d-%H_%M')"  # 基于当前年、月、日、小时、分钟生成唯一标签
+         TAG_NAME="发布时间（UTC）：$(date +'%Y.%m.%d-%H_%M')"  # 基于当前年、月、日、小时、分钟生成唯一标签
          echo "TAG_NAME=${TAG_NAME}"  # 显示标签名
          git tag $TAG_NAME  # 创建新的 Git 标签
          git push origin $TAG_NAME  # 推送标签到远程仓库
@@ -144,7 +144,7 @@ jobs:
       with:
           tag_name: ${{ env.TAG_NAME }}  # 从环境变量中获取标签名
           files: |
-              pre-build-docker.tar.gz.*
+              ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz.*
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
