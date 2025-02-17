@@ -33,7 +33,7 @@ jobs:
           echo "branch=${{ matrix.branch }}" >> $GITHUB_ENV
         elif [[ "${{ matrix.version }}" == "lede" ]]; then
           if [[ "${{ matrix.branch }}" == "openwrt-24.10" ]]; then
-            echo "branch=main" >> $GITHUB_ENV
+            echo "branch=master" >> $GITHUB_ENV
           else
             exit 0
           fi
