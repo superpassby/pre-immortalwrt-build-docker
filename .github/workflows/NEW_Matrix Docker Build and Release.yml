@@ -55,7 +55,7 @@ jobs:
         run: |
           FILE_PATHS=$(find . -type f -name "${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz.7z*")
           echo "$FILE_PATHS" > file_paths.txt  # 将文件路径保存到 file_paths.txt
-          echo "FILE_PATHS=$FILE_PATHS" >> $GITHUB_ENV  # 将文件路径直接传递到环境变量
+          echo "FILE_PATHS=file_paths.txt" >> $GITHUB_ENV  # 将文件路径文件路径传递到环境变量
 
   Release:
     needs: Building
@@ -66,11 +66,16 @@ jobs:
 
       - name: Verify file paths from environment variable
         run: |
-          echo "File paths: ${{ env.FILE_PATHS }}"
-          for file in ${{ env.FILE_PATHS }}; do
-            echo "Checking file: $file"
-            ls -la $file  # 检查每个文件是否存在
-          done
+          echo "File paths file: ${{ env.FILE_PATHS }}"
+          if [ -f "${{ env.FILE_PATHS }}" ]; then
+            FILE_PATHS=$(cat ${{ env.FILE_PATHS }})
+            for file in $FILE_PATHS; do
+              echo "Checking file: $file"
+              ls -la $file  # 检查每个分割文件是否存在
+            done
+          else
+            echo "File paths file not found!"
+          fi
 
       - name: Create Git tag
         id: create_tag
@@ -87,7 +92,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.TAG_NAME }}
-          files: ${{ env.FILE_PATHS }}  # 使用环境变量传递分割文件路径
+          files: |
+            $(cat ${{ env.FILE_PATHS }})  # 通过读取 file_paths.txt 中的路径上传文件
           body: "Release with multiple builds"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
