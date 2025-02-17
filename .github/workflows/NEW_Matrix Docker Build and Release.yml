@@ -51,11 +51,14 @@ jobs:
           sudo apt-get install -y p7zip-full
           7z a -v24m ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz.7z ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz
 
-      - name: Set file paths for chunks
-        run: |
-          FILE_PATHS=$(find . -type f -name "${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz.7z*")
-          echo "$FILE_PATHS" > file_paths.txt  # 将文件路径保存到 file_paths.txt
-          echo "FILE_PATHS=file_paths.txt" >> $GITHUB_ENV  # 将文件路径文件路径传递到环境变量
+      - name: Upload artifacts
+        uses: actions/upload-artifact@main
+        with:
+          name: ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}_artifacts
+          path: |
+            ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz.7z*
+          compression-level: 0  # 禁用压缩
+
 
   Release:
     needs: Building
@@ -64,19 +67,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Verify file paths from environment variable
+      - name: Download artifacts
+        uses: actions/download-artifact@main
+        with:
+          path: ./artifacts/*
+          
+      - name: Unzip all artifact files
         run: |
-          echo "File paths file: ${{ env.FILE_PATHS }}"
-          if [ -f "${{ env.FILE_PATHS }}" ]; then
-            FILE_PATHS=$(cat ${{ env.FILE_PATHS }})
-            for file in $FILE_PATHS; do
-              echo "Checking file: $file"
-              ls -la $file  # 检查每个分割文件是否存在
-            done
-          else
-            echo "File paths file not found!"
-          fi
-
+          # 解压所有下载的 .zip 文件并删除原始的 .zip 文件
+          for zip_file in ./artifacts/*.zip; do
+            if [[ -f "$zip_file" ]]; then
+              unzip "$zip_file" -d ./artifacts/
+              rm "$zip_file"  # 删除 .zip 文件
+            fi
+          done
+          
+      - name: List files in ./artifacts
+        run: |
+          echo "Listing files in ./artifacts after unzipping:"
+          ls -la ./artifacts  # 显示解压后的文件列表
+  
       - name: Create Git tag
         id: create_tag
         run: |
@@ -93,7 +103,7 @@ jobs:
         with:
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            $(cat ${{ env.FILE_PATHS }})  # 通过读取 file_paths.txt 中的路径上传文件
+            $(find ./artifacts -name "*.tar.gz*")  # 上传解压后的文件
           body: "Release with multiple builds"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
