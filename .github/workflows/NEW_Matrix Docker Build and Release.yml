@@ -51,12 +51,11 @@ jobs:
           sudo apt-get install -y p7zip-full
           7z a -v24m ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz.7z ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@main
-        with:
-          name: ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}_build
-          path: |
-            ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz.7z*
+      - name: Set file paths for chunks
+        run: |
+          # 这里假设分割的文件是以 .001 形式命名
+          FILE_PATHS=$(find . -type f -name "${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz.7z*")
+          echo "FILE_PATHS=${FILE_PATHS}" >> $GITHUB_ENV  # 将多个文件路径作为环境变量传递
 
   Release:
     needs: Building
@@ -65,15 +64,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@main
-        with:
-          path: artifacts
-
-      - name: Verify downloaded files
+      - name: Verify file paths from environment variable
         run: |
-          echo "Downloaded files:"
-          ls -la artifacts/
+          echo "File paths passed from Building job: ${{ env.FILE_PATHS }}"
+          for file in ${{ env.FILE_PATHS }}; do
+            echo "Checking file: $file"
+            ls -la $file  # 检查每个分割文件是否存在
+          done
 
       - name: Create Git tag
         id: create_tag
@@ -91,15 +88,7 @@ jobs:
         with:
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            artifacts/*.tar.gz.7z*
+            ${{ env.FILE_PATHS }}  # 使用环境变量传递分割文件路径
           body: "Release with multiple builds"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload Build Artifacts to Release
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/*.tar.gz.7z*
-          asset_name: ${{ needs.Building.outputs.version }}-${{ needs.Building.outputs.branch }}-${{ needs.Building.outputs.platform }}.tar.gz.7z
-          asset_content_type: application/gzip
