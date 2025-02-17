@@ -129,7 +129,7 @@ jobs:
          echo "TAG_NAME=${TAG_NAME}"  # 显示标签名
          git tag $TAG_NAME  # 创建新的 Git 标签
          git push origin $TAG_NAME  # 推送标签到远程仓库
-         git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/superpassby/Build-openwrt-in-docker $TAG_NAME  # 使用 PAT 推送标签
+         git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/superpassby/Build-openwrt-in-docker-pre $TAG_NAME  # 使用 PAT 推送标签
          echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV  # 将标签名存储在环境变量中，供后续步骤使用
       env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -147,12 +147,12 @@ jobs:
       run: |
         echo "Deleting old workflow runs..."
         WORKFLOW_RUNS=$(curl -s -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
-          "https://api.github.com/repos/superpassby/Build-openwrt-in-docker/actions/runs")
+          "https://api.github.com/repos/superpassby/Build-openwrt-in-docker-pre/actions/runs")
         RUN_IDS=$(echo $WORKFLOW_RUNS | jq '.workflow_runs | sort_by(.created_at) | reverse | .[3:] | .[].id')
         for RUN_ID in $(echo $RUN_IDS); do
           echo "Deleting workflow run: $RUN_ID"
           curl -X DELETE -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
-          "https://api.github.com/repos/superpassby/Build-openwrt-in-docker/actions/runs/$RUN_ID"
+          "https://api.github.com/repos/superpassby/Build-openwrt-in-docker-pre/actions/runs/$RUN_ID"
         done
 
     - name: Delete old releases
@@ -160,14 +160,14 @@ jobs:
       run: |
         echo "Deleting old releases..."
         RELEASES=$(curl -s -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
-          "https://api.github.com/repos/superpassby/Build-openwrt-in-docker/releases")
+          "https://api.github.com/repos/superpassby/Build-openwrt-in-docker-pre/releases")
         # 按创建时间排序，并排除最近的三个版本
         RELEASE_IDS=$(echo $RELEASES | jq '. | sort_by(.created_at) | reverse | .[3:] | .[].id')
         for RELEASE_ID in $(echo $RELEASE_IDS); do
           RELEASE_NAME=$(echo $RELEASES | jq -r ".[] | select(.id == $RELEASE_ID) | .name")
           echo "Deleting release: $RELEASE_NAME"
           curl -X DELETE -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
-          "https://api.github.com/repos/superpassby/Build-openwrt-in-docker/releases/$RELEASE_ID"
+          "https://api.github.com/repos/superpassby/Build-openwrt-in-docker-pre/releases/$RELEASE_ID"
         done
 
     - name: Delete old tags
@@ -175,7 +175,7 @@ jobs:
       run: |
         echo "Deleting old tags..."
         TAGS=$(curl -s -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
-          "https://api.github.com/repos/superpassby/Build-openwrt-in-docker/tags")
+          "https://api.github.com/repos/superpassby/Build-openwrt-in-docker-pre/tags")
         # 提取时间戳部分并按日期排序
         TAG_NAMES=$(echo $TAGS | jq -r '.[] | {name: .name, date: (.name | match("[0-9]{4}.[0-9]{2}.[0-9]{2}-[0-9]{2}_[0-9]{2}") | .string)} | select(.date != null) | .name' | sort)
         # 删除排名较老的标签
@@ -183,5 +183,5 @@ jobs:
         for TAG_NAME in $(echo "$TAG_NAMES"); do
           echo "Deleting tag: $TAG_NAME"
           curl -X DELETE -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
-          "https://api.github.com/repos/superpassby/Build-openwrt-in-docker/git/refs/tags/$TAG_NAME"
+          "https://api.github.com/repos/superpassby/Build-openwrt-in-docker-pre/git/refs/tags/$TAG_NAME"
         done
