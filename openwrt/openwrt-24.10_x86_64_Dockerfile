@@ -30,7 +30,7 @@ WORKDIR /home/user
 
 # 下载源码
 RUN branch="openwrt-24.10" && \
-    git clone -b $branch --single-branch --filter=blob:none https://github.com/immortalwrt/immortalwrt openwrt
+    git clone -b $branch --single-branch --filter=blob:none https://github.com/openwrt/openwrt openwrt
 
 # Install Feeds
 RUN cd openwrt && \
