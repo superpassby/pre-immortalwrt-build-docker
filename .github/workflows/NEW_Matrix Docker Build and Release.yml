@@ -152,7 +152,3 @@ jobs:
             curl -X DELETE -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/git/refs/tags/$TAG_NAME"
           done
-
-            curl -X DELETE -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
-           "https://api.github.com/repos/${{ github.repository }}/git/refs/tags/$TAG_NAME"
-          done
