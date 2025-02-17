@@ -61,10 +61,9 @@ jobs:
           echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
           git tag -a "$TAG_NAME" -m "Release for $TAG_NAME"
           git push origin "$TAG_NAME"
-          
-        # 设置输出 TAG_NAME
-        outputs:
-          tag_name: ${{ env.TAG_NAME }}
+
+    outputs:
+      tag_name: ${{ env.TAG_NAME }}  # 在作业级别定义输出
 
   Release:
     needs: Building
@@ -79,7 +78,7 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.Building.outputs.tag_name }}  # 使用 Building 作业输出的标签
+          tag_name: ${{ needs.Building.outputs.tag_name }}  # 从 Building 作业中获取 TAG_NAME
           files: |
             artifacts/${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}_build/*
           body: "Release with multiple builds"
