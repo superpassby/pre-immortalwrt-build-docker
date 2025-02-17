@@ -14,8 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        #version: [immortalwrt, openwrt, lede]
-        version: [immortalwrt, openwrt]
+        #version: [immortalwrt, openwrt, lede, Lienol]
+        #version: [immortalwrt, openwrt]
+        version: [immortalwrt, openwrt, lede, Lienol]
         platform: [x86_64]
         #branch: [openwrt-24.10, openwrt-23.10]  # 默认分支
         branch: [openwrt-24.10]
