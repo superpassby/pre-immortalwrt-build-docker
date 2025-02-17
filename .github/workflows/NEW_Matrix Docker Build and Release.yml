@@ -79,13 +79,16 @@ jobs:
           
       - name: Unzip all artifact files
         run: |
-          # 解压所有下载的 .zip 文件并删除原始的 .zip 文件
-          for zip_file in ./artifacts/*.zip; do
+          # 解压 ./artifacts/ 目录及其子目录中的所有 .zip 文件
+          shopt -s globstar  # 开启 globstar 以支持 ** 递归匹配
+          for zip_file in ./artifacts/**/*.zip; do
             if [[ -f "$zip_file" ]]; then
-              unzip "$zip_file" -d ./artifacts/
+              echo "Unzipping $zip_file..."
+              unzip "$zip_file" -d ./artifacts/  # 解压到 ./artifacts/ 目录
               rm "$zip_file"  # 删除 .zip 文件
             fi
           done
+
           
       - name: List files in ./artifacts
         run: |
@@ -107,7 +110,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.TAG_NAME }}
-          files: ./artifacts/* 
+          files: ./artifacts/**/*  # 递归匹配所有文件
           body: "Release with multiple builds"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
