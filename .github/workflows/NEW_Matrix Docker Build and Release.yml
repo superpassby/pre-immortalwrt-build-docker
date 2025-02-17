@@ -72,7 +72,7 @@ jobs:
 
       - name: Set up GitHub Release
         id: create_release
-        uses: softprops/action-gh-release@main
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             artifacts/${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}_build/*
