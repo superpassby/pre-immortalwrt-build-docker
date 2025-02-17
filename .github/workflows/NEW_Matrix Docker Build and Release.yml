@@ -56,7 +56,7 @@ jobs:
         with:
           name: ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}_build
           path: |
-            ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz.7z.*
+            ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz.7z*
 
   Release:
     needs: Building
@@ -69,6 +69,11 @@ jobs:
         uses: actions/download-artifact@main
         with:
           path: artifacts
+
+      - name: Verify downloaded files
+        run: |
+          echo "Downloaded files:"
+          ls -la artifacts/
 
       - name: Create Git tag
         id: create_tag
@@ -86,7 +91,7 @@ jobs:
         with:
           tag_name: ${{ env.TAG_NAME }}
           files: |
-            artifacts/${{ needs.Building.outputs.version }}_${{ needs.Building.outputs.branch }}_${{ needs.Building.outputs.platform }}_build/*
+            artifacts/*.tar.gz.7z*
           body: "Release with multiple builds"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -95,6 +100,6 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/${{ needs.Building.outputs.version }}_${{ needs.Building.outputs.branch }}_${{ needs.Building.outputs.platform }}_build/*
+          asset_path: artifacts/*.tar.gz.7z*
           asset_name: ${{ needs.Building.outputs.version }}-${{ needs.Building.outputs.branch }}-${{ needs.Building.outputs.platform }}.tar.gz.7z
           asset_content_type: application/gzip
