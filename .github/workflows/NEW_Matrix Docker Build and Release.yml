@@ -13,6 +13,10 @@ jobs:
         version: [immortalwrt, openwrt, lede, lienol]
         platform: [x86_64]
         branch: [openwrt-24.10]
+    outputs:
+      version: ${{ matrix.version }}
+      branch: ${{ env.branch }}
+      platform: ${{ matrix.platform }}
 
     steps:
       - name: Checkout code
