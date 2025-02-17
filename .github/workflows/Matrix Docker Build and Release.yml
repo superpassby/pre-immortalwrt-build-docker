@@ -14,9 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [immortalwrt, openwrt]
-        #version: [immortalwrt]
+        version: [immortalwrt, openwrt, lede]
         platform: [x86_64]
+        branch: [openwrt-24.10, openwrt-23.10]  # 默认分支
+        # 如果 version 为 lede，默认分支将是 main，稍后调整
        
     steps:
     - name: Checkout code
@@ -25,14 +26,16 @@ jobs:
     - name: Determine branch
       id: set_branch
       run: |
-        if [ "${{ matrix.version }}" == "immortalwrt" ]; then
-          echo "Branching for immortalwrt"
-          echo "branch=openwrt-24.10,openwrt-23.05" >> $GITHUB_ENV
-        elif [ "${{ matrix.version }}" == "openwrt" ]; then
-          echo "Branching for openwrt"
-          echo "branch=openwrt-24.10,openwrt-23.05" >> $GITHUB_ENV
+        if [[ "${{ matrix.version }}" == "immortalwrt" || "${{ matrix.version }}" == "openwrt" ]]; then
+          echo "branch=${{ matrix.branch }}" >> $GITHUB_ENV
+        elif [[ "${{ matrix.version }}" == "lede" ]]; then
+          if [[ "${{ matrix.branch }}" == "openwrt-24.10" ]]; then
+            echo "branch=main" >> $GITHUB_ENV
+          else
+            exit 0
+          fi
         fi
-
+    
     - name: Check Server Performance
       run: |
         echo "--------------------------CPU信息--------------------------"
@@ -112,7 +115,7 @@ jobs:
     - name: Create Git tag
       id: create_tag  # 给步骤添加一个 id
       run: |
-         TAG_NAME="${{ matrix.version }}_${{ matrix.branch }}_${{ matrix.platform }}_$(date +'%Y.%m.%d-%H_%M')"  # 基于当前年、月、日、小时、分钟生成唯一标签
+         TAG_NAME="${{ matrix.version }}_${{ matrix.branch }}_${{ env.branch }}_$(date +'%Y.%m.%d-%H_%M')"  # 基于当前年、月、日、小时、分钟生成唯一标签
          echo "TAG_NAME=${TAG_NAME}"  # 显示标签名
          git tag $TAG_NAME  # 创建新的 Git 标签
          git push origin $TAG_NAME  # 推送标签到远程仓库
