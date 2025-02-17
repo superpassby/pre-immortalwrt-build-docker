@@ -61,7 +61,7 @@ jobs:
         echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
         echo "::set-output name=tag_name::${TAG_NAME}"
 
-  release:
+  Release:
     needs: Building
     runs-on: ubuntu-latest
     steps:
@@ -74,6 +74,7 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.TAG_NAME }}  # 使用创建的标签
           files: |
             artifacts/${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}_build/*
           body: "Release with multiple builds"
