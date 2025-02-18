@@ -38,6 +38,44 @@ jobs:
             echo "branch=${branch_name}" >> $GITHUB_ENV
           fi
 
+      - name: 查看机器配置  
+        run: |  
+          echo "警告⚠"  
+          echo "分配的服务器性能有限，若选择的插件过多，务必注意CPU性能！"  
+          echo -e "CPU性能排序: 7763 > 8370C > 8272CL > 8171M > E5-2673\n"  
+          echo "--------------------------CPU信息--------------------------"  
+          echo "CPU物理数量: $(cat /proc/cpuinfo | grep "physical id" | sort | uniq | wc -l)"  
+          echo "CPU核心数量: $(nproc)"  
+          echo -e "CPU型号信息:$(cat /proc/cpuinfo | grep -m1 name | awk -F: '{print $2}')\n"  
+          echo "--------------------------内存信息--------------------------"  
+          echo "已安装内存详细信息:"  
+          echo -e "$(sudo lshw -short -C memory | grep GiB)\n"  
+          echo "--------------------------硬盘信息--------------------------"  
+          echo "硬盘数量: $(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT  
+      
+      - name: "Optimize Disk Space"
+        uses: "hugoalh/disk-space-optimizer-ghaction@v0.8.0"
+        with:
+          operate_sudo: "True"
+          general_include: ".+"
+          docker_include: ".+"
+          docker_prune: "True"
+          docker_clean: "True"
+          apt_prune: "True"
+          apt_clean: "True"
+          homebrew_prune: "True"
+          homebrew_clean: "True"
+          npm_prune: "True"
+          npm_clean: "True"
+          os_swap: "True" 
+      
+      - name: Show disk space
+        run: |
+          echo "Show disk space"
+          echo "=============================================================================="
+          df -hT
+          echo "=============================================================================="
+      
       - name: Build Docker image
         run: |
           docker build -t ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }} -f ./${{ matrix.version }}/${{ env.branch }}_${{ matrix.platform }}_Dockerfile .
@@ -45,12 +83,22 @@ jobs:
       - name: Save Docker image to a tar file
         run: |
           docker save ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }} | gzip > ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz
+          ls -lh ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz
+
 
       - name: Split the tar file into smaller chunks
         run: |
           sudo apt-get install -y p7zip-full
           7z a -v1024m ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz.7z ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz
+          ls -lh ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }}.tar.gz*
 
+      - name: Show disk space
+        run: |
+          echo "Show disk space"
+          echo "=============================================================================="
+          df -hT
+          echo "=============================================================================="
+      
       - name: Upload artifacts
         uses: actions/upload-artifact@main
         with:
@@ -67,12 +115,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Show disk space
+      - name: List files in ./artifacts
+        #if: false  # 跳过该步骤
+        if: true  # 该步骤会执行
         run: |
           echo "Show disk space"
           echo "=============================================================================="
           df -hT
           echo "=============================================================================="
+          echo "Listing files in ./artifacts after unzipping:"
+          ls -la ./artifacts/**/  # 显示解压后的文件列表
   
       - name: Download artifacts
         uses: actions/download-artifact@main
@@ -80,13 +132,15 @@ jobs:
           path: ./artifacts/
 
       - name: List files in ./artifacts
+        #if: false  # 跳过该步骤
+        if: true  # 该步骤会执行
         run: |
           echo "Show disk space"
           echo "=============================================================================="
           df -hT
           echo "=============================================================================="
           echo "Listing files in ./artifacts after unzipping:"
-          ls -la ./artifacts  # 显示解压后的文件列表
+          ls -la ./artifacts/**/  # 显示解压后的文件列表
           
       - name: Unzip all artifact files
         run: |
@@ -102,13 +156,15 @@ jobs:
 
           
       - name: List files in ./artifacts
+        #if: false  # 跳过该步骤
+        if: true  # 该步骤会执行
         run: |
           echo "Show disk space"
           echo "=============================================================================="
           df -hT
           echo "=============================================================================="
           echo "Listing files in ./artifacts after unzipping:"
-          ls -la ./artifacts  # 显示解压后的文件列表
+          ls -la ./artifacts/**/  # 显示解压后的文件列表
   
       - name: Create Git tag
         id: create_tag
@@ -167,3 +223,10 @@ jobs:
             curl -X DELETE -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/git/refs/tags/$TAG_NAME"
           done
+
+      - name: Delete all files in ./artifacts
+        #if: false  # 跳过该步骤
+        if: true  # 该步骤会执行
+        run: |
+          echo "Deleting all files in ./artifacts..."
+          rm -rf ./artifacts/*
