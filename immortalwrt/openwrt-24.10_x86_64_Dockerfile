@@ -13,7 +13,7 @@ RUN apt-get update -qq && apt-get install -qqy --no-install-recommends ack antlr
     libreadline-dev libssl-dev libtool libyaml-dev libz-dev lld llvm lrzsz mkisofs msmtp nano \
     ninja-build p7zip p7zip-full patch pkgconf python3 python3-pip python3-ply python3-docutils \
     python3-pyelftools qemu-utils re2c rsync scons squashfs-tools subversion swig texinfo uglifyjs \
-    upx-ucl unzip vim wget xmlto xxd zlib1g-dev zstd sudo
+    upx-ucl unzip vim wget xmlto xxd zlib1g-dev zstd sudo screen
 
 # 创建一个用户来执行编译（避免使用 root 权限）
 RUN useradd -m user
