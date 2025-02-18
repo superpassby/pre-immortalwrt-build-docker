@@ -123,8 +123,6 @@ jobs:
           echo "=============================================================================="
           df -hT
           echo "=============================================================================="
-          echo "Listing files in ./artifacts after unzipping:"
-          ls -la ./artifacts/**/  # 显示解压后的文件列表
   
       - name: Download artifacts
         uses: actions/download-artifact@main
@@ -139,8 +137,6 @@ jobs:
           echo "=============================================================================="
           df -hT
           echo "=============================================================================="
-          echo "Listing files in ./artifacts after unzipping:"
-          ls -la ./artifacts/**/  # 显示解压后的文件列表
           
       - name: Unzip all artifact files
         run: |
@@ -163,8 +159,6 @@ jobs:
           echo "=============================================================================="
           df -hT
           echo "=============================================================================="
-          echo "Listing files in ./artifacts after unzipping:"
-          ls -la ./artifacts/**/  # 显示解压后的文件列表
   
       - name: Create Git tag
         id: create_tag
