@@ -13,7 +13,7 @@ RUN apt-get update -qq && apt-get install -qqy --no-install-recommends ack antlr
     ninja-build p7zip p7zip-full patch pkgconf python3 python3-pip python3-ply python3-docutils \
     python3-pyelftools qemu-utils re2c rsync scons squashfs-tools subversion swig texinfo uglifyjs \
     upx-ucl unzip vim wget xmlto xxd zlib1g-dev zstd sudo \
-    flex gawk  grep  libc-dev  perl rsync subversion unzip 
+    flex gawk  grep  libc-dev  perl rsync subversion unzip screen
 
     #无法安装的包：
     #diff find getopt install make4.1+ which
