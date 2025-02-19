@@ -80,10 +80,13 @@ jobs:
       - name: Copy Files
         run: |
           git clone --depth 1 https://github.com/passbysuper/Build-openwrt-in-docker
-          cp Build-openwrt-in-docker/${{ matrix.version }}/${{ env.branch }}/${{ matrix.platform }}/diffconfig ./
-          cp Build-openwrt-in-docker/${{ matrix.version }}/${{ env.branch }}/${{ matrix.platform }}/diy.sh ./
+          cp ./Build-openwrt-in-docker/${{ matrix.version }}/${{ env.branch }}/${{ matrix.platform }}/diffconfig ./
+          cp ./Build-openwrt-in-docker/${{ matrix.version }}/${{ env.branch }}/${{ matrix.platform }}/diy.sh ./
+          echo "=============================================================================="
+          echo "当前目录文件"
+          ls
+          echo "=============================================================================="
           
-      
       - name: Build Docker image
         run: |
           docker build -t ${{ matrix.version }}_${{ env.branch }}_${{ matrix.platform }} -f ./${{ matrix.version }}/${{ env.branch }}_${{ matrix.platform }}_Dockerfile .
