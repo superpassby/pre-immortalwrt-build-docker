@@ -1,5 +1,3 @@
-
-
 FROM debian:11
 
 # 设置工作目录
@@ -27,15 +25,22 @@ RUN echo "user ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/user && \
 USER user
 WORKDIR /home/user
 
-
 # 下载源码
 RUN branch="openwrt-24.10" && \
     git clone -b $branch --single-branch --filter=blob:none https://github.com/openwrt/openwrt openwrt
 
+# 传入宿主机当前目录下的 diy.sh 和 diffconfig 到容器中的 /home/user/openwrt
+COPY ./diy.sh ./diffconfig /home/user/openwrt/
+
+# 赋予 diy.sh 执行权限
+RUN chmod +x /home/user/openwrt/diy.sh
+
 # Install Feeds
 RUN cd openwrt && \
+    ./diy.sh && \
     ./scripts/feeds update -a && \
     ./scripts/feeds install -a && \
+    cp diffconfig .config && \
     make defconfig
 
 # Download DL Package
