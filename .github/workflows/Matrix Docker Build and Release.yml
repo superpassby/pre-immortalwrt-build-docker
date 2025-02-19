@@ -10,7 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [immortalwrt, openwrt, lede, lienol]
+        #version: [immortalwrt, openwrt, lede, lienol]
+        version: [openwrt]
         platform: [x86_64]
         branch: [openwrt-24.10]
     outputs:
@@ -75,6 +76,13 @@ jobs:
           echo "=============================================================================="
           df -hT
           echo "=============================================================================="
+
+      - name: Copy Files
+        run: |
+          git clone --depth 1 https://github.com/passbysuper/Build-openwrt-in-docker
+          cp Build-openwrt-in-docker/${{ matrix.version }}/${{ env.branch }}/${{ matrix.platform }}/diffconfig ./
+          cp Build-openwrt-in-docker/${{ matrix.version }}/${{ env.branch }}/${{ matrix.platform }}/diy.sh ./
+          
       
       - name: Build Docker image
         run: |
